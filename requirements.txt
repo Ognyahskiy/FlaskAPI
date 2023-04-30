@@ -2,6 +2,7 @@ alembic==1.10.4
 aniso8601==9.0.1
 anyio==3.6.2
 attrs==23.1.0
+bcrypt==4.0.1
 black==23.3.0
 blinker==1.6.2
 certifi==2022.12.7
@@ -28,6 +29,7 @@ MarkupSafe==2.1.2
 mypy-extensions==1.0.0
 openapi==1.1.0
 packaging==23.1
+passlib==1.7.4
 pathspec==0.11.1
 platformdirs==3.5.0
 pluggy==1.0.0
