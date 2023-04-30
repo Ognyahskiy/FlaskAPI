@@ -32,3 +32,4 @@ def test_delete():
 
     assert res.status_code == 204
     assert Teach.query.get(1) is None
+ 
