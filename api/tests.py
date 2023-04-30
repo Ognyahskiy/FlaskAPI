@@ -1,20 +1,19 @@
 from api.main import app, client
-from api.models import Teach
+from api.models import Resume
 
 
 def test_get():
     res = client.get("/file")
     assert res.status_code == 200
 
-    assert len(res.get_json()) == len(Teach.query.all())
+    assert len(res.get_json()) == len(Resume.query.all())
     assert res.get_json()[0]['id'] == 2
 
 
 def test_post():
-    data = {
-        'Username': 'Asker',
-        'email': 'example@box.ru'
-    }
+    data = {'full_name': 'Asker',
+            'age': '0',
+            'description': 'help me'}
 
     res = client.post('/file', json=data)
 
@@ -22,13 +21,13 @@ def test_post():
 
 
 def test_put():
-    res = client.put('/file/3', json={'Username': 'UPD'})
+    res = client.put('/file/1', json={'full_name': 'UPD'})
     assert res.status_code == 200
-    assert Teach.query.get(3).Username == 'UPD'
+    assert Resume.query.get(1).full_name == 'UPD'
 
 
 def test_delete():
-    res = client.delete('/file/4')
+    res = client.delete('/file/1')
 
     assert res.status_code == 204
-    assert Teach.query.get(1) is None
+    assert Resume.query.get(1) is None
