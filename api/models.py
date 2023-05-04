@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from flask_jwt_extended import create_access_token, create_refresh_token
 from passlib.hash import bcrypt
 from api.main import Base, session
+from datetime import timedelta
 
 
 class Resume(Base):  # создание анкеты
@@ -28,11 +29,11 @@ class User(Base):  # создаем таблицу с данными польз�
         self.password = bcrypt.hash(kwargs.get('password'))
 
     def get_access_token(self):
-        access_token = create_access_token(identity=self.id)
+        access_token = create_access_token(identity=self.id, expires_delta=timedelta(minutes=1))
         return access_token
 
     def get_refresh_token(self):
-        refresh_token = create_refresh_token(identity=self.id)
+        refresh_token = create_refresh_token(identity=self.id,expires_delta=timedelta(days=2))
         return refresh_token
 
     @classmethod
