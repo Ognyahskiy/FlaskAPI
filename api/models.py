@@ -29,7 +29,7 @@ class User(Base):  # создаем таблицу с данными польз�
         self.password = bcrypt.hash(kwargs.get('password'))
 
     def get_access_token(self):
-        access_token = create_access_token(identity=self.id, expires_delta=timedelta(minutes=1))
+        access_token = create_access_token(identity=self.id, expires_delta=timedelta(hours=15))
         return access_token
 
     def get_refresh_token(self):
