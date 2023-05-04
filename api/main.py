@@ -93,9 +93,9 @@ def ger_cards():
     resume = Resume.query.all()
     serialized = []
     for resume in resume:
-            serialized.append({'full_name': resume.full_name,
-                               'age': resume.age,
-                               'description': resume.description})
+        serialized.append({'full_name': resume.full_name,
+                           'age': resume.age,
+                           'description': resume.description})
     rnd_crd = []
     for _ in range(1000):
         if len(rnd_crd) == 5:
@@ -126,6 +126,18 @@ def login():
     access_token = user.get_access_token()
     refresh_token = user.get_refresh_token()
     return {'access_token': access_token, 'refresh token': refresh_token}
+
+
+@app.route('/delete', methods=['DELETE'], endpoint='delete_user') # удаление пользователя
+@jwt_required()
+def delete_user():
+    user_id = get_jwt_identity()
+    item = User.query.filter(User.id == user_id).first()
+    if not item:
+        return {'message': 'User alredy deleted'}, 400
+    session.delete(item)
+    session.commit()
+    return '', 204
 
 
 @app.route('/refresh', methods=['POST'], endpoint='refresh')  # метод обновления jwt-токена
