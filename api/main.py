@@ -1,3 +1,4 @@
+import random
 from flask import Flask, jsonify, request
 from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
 from sqlalchemy import create_engine
@@ -23,7 +24,7 @@ Base.metadata.create_all(bind=engine)
 
 
 @app.route('/file', methods=['GET'], endpoint='get_list')  # метод получения данных
-@jwt_required
+@jwt_required()
 def get_list():
     resume_id = get_jwt_identity()
     resume = Resume.query.filter(Resume.resume_id == resume_id).all()
@@ -38,7 +39,7 @@ def get_list():
 
 
 @app.route('/file', methods=["POST"], endpoint='update_list')  # метод ввода данных
-@jwt_required
+@jwt_required()
 def update_list():
     resume_id = get_jwt_identity()
     new_one = Resume(resume_id=resume_id, **request.json)
@@ -53,7 +54,7 @@ def update_list():
 
 
 @app.route("/file/<int:file_id>", methods=['PUT'], endpoint='update_file')  # метод внесения измнений в данные
-@jwt_required
+@jwt_required()
 def update_file(file_id):
     resume_id = get_jwt_identity()
     item = Resume.query.filter(Resume.id == file_id,
@@ -73,7 +74,7 @@ def update_file(file_id):
 
 
 @app.route('/file/<int:file_id>', methods=['DELETE'], endpoint='delete_file')  # метод удаления данных
-@jwt_required
+@jwt_required()
 def delete_file(file_id):
     resume_id = get_jwt_identity()
     item = Resume.query.filter(Resume.id == file_id,
@@ -83,6 +84,28 @@ def delete_file(file_id):
     session.delete(item)
     session.commit()
     return '', 204
+
+
+# достаем 5 карточек из бд
+@app.route('/cards', methods=['GET'], endpoint='get_cards')
+@jwt_required()
+def ger_cards():
+    resume = Resume.query.all()
+    serialized = []
+    for resume in resume:
+            serialized.append({'full_name': resume.full_name,
+                               'age': resume.age,
+                               'description': resume.description})
+    rnd_crd = []
+    for _ in range(1000):
+        if len(rnd_crd) == 5:
+            break
+        rnd_card = random.choice(serialized)
+        if rnd_card in rnd_crd:
+            pass
+        else:
+            rnd_crd.append(rnd_card)
+    return jsonify(rnd_crd)
 
 
 @app.route('/register', methods=['POST'], endpoint='register')  # метод регистрации пользователя
@@ -111,6 +134,10 @@ def refresh():
     resume_id = get_jwt_identity()
     access_token = create_access_token(identity=resume_id)
     return jsonify(access_token=access_token)
+
+
+# 1)Реализовать лайк\бан систему(пока не придумал)
+# 2)Написать чат человек-женщина
 
 
 @app.teardown_appcontext
