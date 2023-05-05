@@ -4,9 +4,12 @@ from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
 from sqlalchemy import create_engine
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from api.config import Config
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
+app.config['CORS_HEADERS'] = 'Content-Type'
 app.config.from_object(Config)  # извлекаем данные из файла config.py
 
 client = app.test_client()
@@ -108,8 +111,9 @@ def ger_cards():
     return jsonify(rnd_crd)
 
 
-@app.route('/register', methods=['POST'], endpoint='register')  # метод регистрации пользователя
+@app.route('/register', methods=['GET', 'POST'], endpoint='register')  # метод регистрации пользователя
 def register():
+    data={}
     params = request.json
     user = User(**params)
     session.add(user)
@@ -119,8 +123,9 @@ def register():
     return {'access_token': access_token, 'refresh token': refresh_token}
 
 
-@app.route('/login', methods=['POST'], endpoint='login')  # метод авторизации пользователя
+@app.route('/login', methods=['GET','POST'], endpoint='login')  # метод авторизации пользователя
 def login():
+    data={}
     params = request.json
     user = User.autenticate(**params)
     access_token = user.get_access_token()
@@ -139,6 +144,7 @@ def delete_user():
     session.commit()
     return '', 204
 
+@app.route
 
 @app.route('/refresh', methods=['POST'], endpoint='refresh')  # метод обновления jwt-токена
 @jwt_required(refresh=True)
