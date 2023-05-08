@@ -1,5 +1,15 @@
 from api.main import app, client
-from api.models import Resume, User
+from api.models import user_data, User, sympathy
+
+
+'''def test_like_card():
+    log = client.post('/login', json={'email': 'TEST', 'password': 'TEST'})
+    token = log.get_json()
+    access_token = token['access_token']
+    res = client.get('/cards', headers={'Authorization': f'Bearer {access_token}'})
+    print(res.get_json())
+
+    assert like.status_code == 200'''
 
 
 def test_register():
@@ -10,15 +20,14 @@ def test_register():
 
 def test_login():
     log = client.post('/login', json={'email': 'TEST', 'password': 'TEST'})
-
     assert log.status_code == 200
 
 
-def test_get_list():
+def test_get_profile_list():
     log = client.post('/login', json={'email': 'TEST', 'password': 'TEST'})
     token = log.get_json()
     access_token = token['access_token']
-    res = client.get("/file", headers={'Authorization': f'Bearer {access_token}'})
+    res = client.get("/profile", headers={'Authorization': f'Bearer {access_token}'})
 
     assert res.status_code == 200
 
@@ -33,7 +42,7 @@ def test_get_cards():
     assert len(res.get_json()) <= 5
 
 
-def test_update_list():
+def test_add_profile():
     log = client.post('/login', json={'email': 'TEST', 'password': 'TEST'})
     token = log.get_json()
     access_token = token['access_token']
@@ -42,28 +51,28 @@ def test_update_list():
             'age': '0',
             'description': 'TEST'}
 
-    res = client.post('/file', json=data, headers={'Authorization': f'Bearer {access_token}'})
+    res = client.post('/profile', json=data, headers={'Authorization': f'Bearer {access_token}'})
 
     assert res.status_code == 200
 
 
-def test_update_file():
+def test_update_profile():
     log = client.post('/login', json={'email': 'TEST', 'password': 'TEST'})
     token = log.get_json()
     access_token = token['access_token']
-    res = client.put('/file/1', json={'full_name': 'UPD'}, headers={'Authorization': f'Bearer {access_token}'})
+    res = client.put('/profile/1', json={'full_name': 'UPD'}, headers={'Authorization': f'Bearer {access_token}'})
     assert res.status_code == 200
-    assert Resume.query.get(1).full_name == 'UPD'
+    assert user_data.query.get(1).full_name == 'UPD'
 
 
 def test_delete_file():
     log = client.post('/login', json={'email': 'TEST', 'password': 'TEST'})
     token = log.get_json()
     access_token = token['access_token']
-    res = client.delete('/file/1', headers={'Authorization': f'Bearer {access_token}'})
+    res = client.delete('/profile/1', headers={'Authorization': f'Bearer {access_token}'})
 
     assert res.status_code == 204
-    assert Resume.query.get(1) is None
+    assert user_data.query.get(1) is None
 
 
 def test_delete_user():

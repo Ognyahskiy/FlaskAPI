@@ -26,62 +26,62 @@ from api.models import *  # импортируем таблицу
 Base.metadata.create_all(bind=engine)
 
 
-@app.route('/file', methods=['GET'], endpoint='get_list')  # метод получения данных
+@app.route('/profile', methods=['GET'], endpoint='get_profile_data')  # метод получения данных
 @jwt_required()
-def get_list():
-    resume_id = get_jwt_identity()
-    resume = Resume.query.filter(Resume.resume_id == resume_id).all()
+def get_profile_data():
+    data_id = get_jwt_identity()
+    data = user_data.query.filter(user_data.data_id == data_id).all()
     serialized = []
-    for resume in resume:
-        serialized.append({'id': resume.id,
-                           'user_id': resume.resume_id,
-                           'full_name': resume.full_name,
-                           'age': resume.age,
-                           'description': resume.description})
+    for data in data:
+        serialized.append({'id': data.id,
+                           'user_id': data.data_id,
+                           'full_name': data.full_name,
+                           'age': data.age,
+                           'description': data.description})
     return jsonify(serialized)
 
 
-@app.route('/file', methods=["POST"], endpoint='update_list')  # метод ввода данных
+@app.route('/profile', methods=["POST"], endpoint='add_profile')  # метод ввода данных
 @jwt_required()
-def update_list():
-    resume_id = get_jwt_identity()
-    new_one = Resume(resume_id=resume_id, **request.json)
+def add_profile():
+    data_id = get_jwt_identity()
+    new_one = user_data(data_id=data_id, **request.json)
     session.add(new_one)
     session.commit()
     serialized = {'id': new_one.id,
-                  'user_id': new_one.resume_id,
+                  'user_id': new_one.data_id,
                   'full_name': new_one.full_name,
                   'age': new_one.age,
                   'description': new_one.description}
     return jsonify(serialized)
 
 
-@app.route("/file/<int:file_id>", methods=['PUT'], endpoint='update_file')  # метод внесения измнений в данные
+@app.route("/profile/<int:profile_id>", methods=['PUT'], endpoint='update_profile_data')  # метод внесения измнений в данные
 @jwt_required()
-def update_file(file_id):
-    resume_id = get_jwt_identity()
-    item = Resume.query.filter(Resume.id == file_id,
-                               Resume.resume_id == resume_id).first()
+def update_profile_data(profile_id):
+    data_id = get_jwt_identity()
+    item = user_data.query.filter(user_data.id == profile_id,
+                                  user_data.data_id == data_id).first()
     params = request.json
     if not item:
-        return {'message': 'No files with this id'}
+        return {'message': 'No profiles with this id'}
     for key, value in params.items():
         setattr(item, key, value)
     session.commit()
     serialized = {'id': item.id,
-                  'user_id': item.resume_id,
+                  'user_id': item.data_id,
                   'full_name': item.full_name,
                   'age': item.age,
                   'description': item.description}
     return serialized
 
 
-@app.route('/file/<int:file_id>', methods=['DELETE'], endpoint='delete_file')  # метод удаления данных
+@app.route('/profile/<int:profile_id>', methods=['DELETE'], endpoint='delete_profile')  # метод удаления данных
 @jwt_required()
-def delete_file(file_id):
-    resume_id = get_jwt_identity()
-    item = Resume.query.filter(Resume.id == file_id,
-                               Resume.resume_id == resume_id).first()
+def delete_profile(profile_id):
+    data_id = get_jwt_identity()
+    item = user_data.query.filter(user_data.id == profile_id,
+                                  user_data.data_id == data_id).first()
     if not item:
         return {'message': 'No files with this id'}, 400
     session.delete(item)
@@ -93,12 +93,12 @@ def delete_file(file_id):
 @app.route('/cards', methods=['GET'], endpoint='get_cards')
 @jwt_required()
 def ger_cards():
-    resume = Resume.query.all()
+    data = user_data.query.all()
     serialized = []
-    for resume in resume:
-        serialized.append({'full_name': resume.full_name,
-                           'age': resume.age,
-                           'description': resume.description})
+    for data in data:
+        serialized.append({'full_name': data.full_name,
+                           'age': data.age,
+                           'description': data.description})
     rnd_crd = []
     for _ in range(1000):
         if len(rnd_crd) == 5:
@@ -111,9 +111,8 @@ def ger_cards():
     return jsonify(rnd_crd)
 
 
-@app.route('/register', methods=['GET', 'POST'], endpoint='register')  # метод регистрации пользователя
+@app.route('/register', methods=['POST'], endpoint='register')  # метод регистрации пользователя
 def register():
-    data={}
     params = request.json
     user = User(**params)
     session.add(user)
@@ -123,17 +122,21 @@ def register():
     return {'access_token': access_token, 'refresh token': refresh_token}
 
 
-@app.route('/login', methods=['GET','POST'], endpoint='login')  # метод авторизации пользователя
+@app.route('/login', methods=['GET', 'POST'], endpoint='login')  # метод авторизации пользователя
 def login():
-    data={}
     params = request.json
+    try:
+        item = User.query.filter(User.email == params['email']).first()
+        crutch = {'id': item.id, 'username': item.username, 'email': item.email, 'password': item.password}
+    except AttributeError:
+        pass
     user = User.autenticate(**params)
     access_token = user.get_access_token()
     refresh_token = user.get_refresh_token()
-    return {'access_token': access_token, 'refresh token': refresh_token}
+    return {'access_token': access_token, 'refresh token': refresh_token, 'username': crutch['username']}
 
 
-@app.route('/delete', methods=['DELETE'], endpoint='delete_user') # удаление пользователя
+@app.route('/delete', methods=['DELETE'], endpoint='delete_user')  # удаление пользователя
 @jwt_required()
 def delete_user():
     user_id = get_jwt_identity()
@@ -144,7 +147,25 @@ def delete_user():
     session.commit()
     return '', 204
 
-@app.route
+
+@app.route('/like', methods=['GET', 'POST'], endpoint='like_card')
+@jwt_required()
+def like_card():
+    if request.method == 'GET':
+        user = {'id': 15,
+                'full_name': 'Gayy',
+                'description': 'ultragay'}
+        person = []
+        for resume in user:
+            person.append({'id': resume.id,
+                               'user_id': resume.resume_id,
+                               'full_name': resume.full_name,
+                               'age': resume.age,
+                               'description': resume.description})
+        return jsonify(person)
+    if request.method == 'POST':
+        user_id = get_jwt_identity()
+
 
 @app.route('/refresh', methods=['POST'], endpoint='refresh')  # метод обновления jwt-токена
 @jwt_required(refresh=True)

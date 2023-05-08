@@ -6,13 +6,20 @@ from api.main import Base, session
 from datetime import timedelta
 
 
-class Resume(Base):  # создание анкеты
-    __tablename__ = 'resume'
+class user_data(Base):  # создание анкеты
+    __tablename__ = 'user_data'
     id = db.Column(db.Integer, primary_key=True)
-    resume_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    data_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     full_name = db.Column(db.String(64), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(128), nullable=True)
+
+
+class sympathy(Base):
+    __tablename__ = 'like'
+    id=db.Column(db.Integer, primary_key=True)
+    user_id=db.Column(db.Integer, db.ForeignKey('users.id'))
+    likes_id=db.Column(db.Integer, db.ForeignKey('users.id'))
 
 
 class User(Base):  # создаем таблицу с данными пользователей для входа
@@ -21,7 +28,7 @@ class User(Base):  # создаем таблицу с данными польз�
     username = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
-    resumes = relationship('Resume', backref='user', lazy=True)
+    datas = relationship('user_data', backref='user', lazy=True)
 
     def __init__(self, **kwargs):
         self.username = kwargs.get('username')
