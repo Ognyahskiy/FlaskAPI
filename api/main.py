@@ -148,31 +148,27 @@ def delete_user():
     return '', 204
 
 
-@app.route('/like', methods=['GET', 'POST'], endpoint='like_card')
+@app.route('/like', methods=['POST'], endpoint='like_card')
 @jwt_required()
 def like_card():
-    if request.method == 'GET':
-        user = {'id': 15,
-                'full_name': 'Gayy',
-                'description': 'ultragay'}
-        person = []
-        for resume in user:
-            person.append({'id': resume.id,
-                               'user_id': resume.resume_id,
-                               'full_name': resume.full_name,
-                               'age': resume.age,
-                               'description': resume.description})
-        return jsonify(person)
-    if request.method == 'POST':
         user_id = get_jwt_identity()
+        likes_id = sympathy(user_id=user_id, **request.json)
+        session.add(likes_id)
+        session.commit()
+        serialized = {'id': likes_id.id,
+                      'user_id': likes_id.user_id,
+                      'likes_id': likes_id.likes_id}
+        return jsonify(serialized)
+
 
 
 @app.route('/refresh', methods=['POST'], endpoint='refresh')  # метод обновления jwt-токена
 @jwt_required(refresh=True)
 def refresh():
-    resume_id = get_jwt_identity()
-    access_token = create_access_token(identity=resume_id)
-    return jsonify(access_token=access_token)
+    profile_id = get_jwt_identity()
+    access_token = create_access_token(identity=profile_id)
+    refresh_token= create_refresh_token(identity=profile_id)
+    return jsonify(access_token=access_token, refresh_token=refresh_token)
 
 
 # 1)Реализовать лайк\бан систему(пока не придумал)
