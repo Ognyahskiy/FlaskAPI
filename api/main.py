@@ -53,9 +53,13 @@ def get_profile_data():
 def send_message(profile_id):
     data_id = get_jwt_identity()
     item = User.query.filter(User.id == profile_id,
-                                  User.data_id == data_id).first()
+                                  User.id == data_id).first()
     params = request.json
-    # Как получить параметры в эту функцию с фронта?
+    msg=users_chat(**params)
+    session.add(msg)
+    session.commit()
+    serialized={'sender':msg.sender, 'recipient': msg.recipient, 'message': msg.message, 'send_time': msg.send_time, 'read': msg.read}
+    return jsonify(serialized)
 
 
 
