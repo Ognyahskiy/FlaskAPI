@@ -8,6 +8,7 @@ from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from api.config import Config
 from flask_cors import CORS
 
+import os
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -15,8 +16,12 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 app.config.from_object(Config)  # извлекаем данные из файла config.py
 
 client = app.test_client()
+
+# db_username = os.getenv('POSTGRES_USERNAME')
+# db_password = os.getenv('POSTGRES_PASSWORD')
+# db_url = os.getenv('POSTGRES_URL')
 # инициализируем связь с базой данных
-engine = create_engine("postgresql+psycopg2://postgres:postgres@localhost/flaskapi")
+engine = create_engine(f"postgresql+psycopg2://postgres:qwerty005@localhost/flaskapi")
 
 session = scoped_session(sessionmaker(
     autocommit=False, autoflush=False, bind=engine))
@@ -41,6 +46,17 @@ def get_profile_data():
                            'age': data.age,
                            'description': data.description})
     return jsonify(serialized)
+
+
+@app.route('/chat/<int:profile_id>', methods=["POST"], endpoint='send_message')
+@jwt_required()
+def send_message(profile_id):
+    data_id = get_jwt_identity()
+    item = user_data.query.filter(user_data.id == profile_id,
+                                  user_data.data_id == data_id).first()
+    params = request.json
+    # Как получить параметры в эту функцию с фронта?
+
 
 
 @app.route('/profile', methods=["POST"], endpoint='add_profile')  # метод ввода данных
