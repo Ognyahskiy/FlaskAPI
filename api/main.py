@@ -50,11 +50,17 @@ def get_profile_data():
 @jwt_required()
 def send_message(profile_id):
     data_id = get_jwt_identity()
-    item = user_data.query.filter(user_data.id == profile_id,
-                                  user_data.data_id == data_id).first()
+    item = User.query.filter(User.id == profile_id,
+                                  User.id == data_id).first()
     params = request.json
-    # Как получить параметры в эту функцию с фронта?
-
+    l = {}
+    return l
+    # for key, value in params.items():
+    #     setattr(item, key, value)
+    # msg=users_chat(**item)
+    # session.add(msg)
+    # session.commit()
+    # return l
 
 
 @app.route('/profile', methods=["POST"], endpoint='add_profile')  # метод ввода данных

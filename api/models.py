@@ -21,7 +21,7 @@ class users_chat(Base):
     sender = db.Column(db.Integer, db.ForeignKey('users.id'))
     recipient = db.Column(db.Integer, db.ForeignKey('users.id'))
     message = db.Column(db.String(512), nullable=False)
-    send_time = db.Column(db.Date, nullable=False)
+    send_time = db.Column(db.String(32), nullable=False)
     read = db.Column(db.Boolean, nullable=False)
 
 

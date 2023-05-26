@@ -13,7 +13,7 @@ from api.models import user_data, User, sympathy
 
 
 def test_register():
-    reg = client.post('/register', json={'username': 'TEST', 'email': 'TEST', 'password': 'TEST'})
+    reg = client.post('/register', json={'username': 'TEST1', 'email': 'TEST1', 'password': 'TEST1'})
 
     assert reg.status_code == 200
 
@@ -82,3 +82,10 @@ def test_delete_user():
     delete = client.delete('/delete', headers={'Authorization': f'Bearer {access_token}'})
 
     assert delete.status_code == 204
+
+def test_send_message():
+    log = client.post('/login', json={'email': 'TEST', 'password': 'TEST'})
+    token = log.get_json()
+    access_token = token['access_token']
+    res = client.put('/chat/1', json={'s': '1', 'p':'2', 'm':'lol', 't':'09:20'}, headers={'Authorization': f'Bearer {access_token}'})
+    assert res.status_code == 200
