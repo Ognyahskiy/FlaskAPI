@@ -32,13 +32,20 @@ class sympathy(Base):
     likes_id=db.Column(db.Integer, db.ForeignKey('users.id'))
 
 
+class tokens(Base):
+    __tablename__ = 'tokens'
+    id = db.Column(db.Integer, primary_key=True)
+    jwt = db.Column(db.String(512))
+    refresh = db.Column(db.String(512))
 class User(Base):  # создаем таблицу с данными пользователей для входа
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
-    datas = relationship('user_data', backref='user', lazy=True)
+    age = db.Column(db.Integer, nullable=True)
+    description = db.Column(db.String(128), nullable=True)
+    #datas = relationship('user_data', backref='user', lazy=True)
 
     def __init__(self, **kwargs):
         self.username = kwargs.get('username')
