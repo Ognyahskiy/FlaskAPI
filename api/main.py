@@ -15,11 +15,11 @@ app.config.from_object(Config)  # извлекаем данные из файл�
 
 client = app.test_client()
 
-db_username = os.getenv('POSTGRES_USERNAME')
-db_password = os.getenv('POSTGRES_PASSWORD')
-db_url = os.getenv('POSTGRES_URL')
+# db_username = os.getenv('POSTGRES_USERNAME')
+# db_password = os.getenv('POSTGRES_PASSWORD')
+# db_url = os.getenv('POSTGRES_URL')
 # инициализируем связь с базой данных
-engine = create_engine(f"postgresql+psycopg2://{db_username}:{db_password}@{db_url}/flaskapi")
+engine = create_engine(f"postgresql+psycopg2://postgres:qwerty005@localhost/flaskapi")
 
 session = scoped_session(sessionmaker(
     autocommit=False, autoflush=False, bind=engine))
