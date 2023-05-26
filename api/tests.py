@@ -60,7 +60,7 @@ def test_update_profile():
     log = client.post('/login', json={'email': 'TEST', 'password': 'TEST'})
     token = log.get_json()
     access_token = token['access_token']
-    res = client.put('/profile/3', json={'username': 'UPD', 'age':'5', 'description':'gay'}, headers={'Authorization': f'Bearer {access_token}'})
+    res = client.put('/profile/3', json={'username': 'UPD', 'age':'5', 'description':'test'}, headers={'Authorization': f'Bearer {access_token}'})
     assert res.status_code == 200
     assert User.query.get(3).username == 'UPD'
 
