@@ -21,7 +21,7 @@ client = app.test_client()
 # db_password = os.getenv('POSTGRES_PASSWORD')
 # db_url = os.getenv('POSTGRES_URL')
 # инициализируем связь с базой данных
-engine = create_engine(f"postgresql+psycopg2://postgres:qwerty005@localhost/flaskapi")
+engine = create_engine(f"postgresql+psycopg2://postgres:postgres@localhost/flaskapi")
 
 session = scoped_session(sessionmaker(
     autocommit=False, autoflush=False, bind=engine))
@@ -37,12 +37,12 @@ Base.metadata.create_all(bind=engine)
 @jwt_required()
 def get_profile_data():
     data_id = get_jwt_identity()
-    data = user_data.query.filter(user_data.data_id == data_id).all()
+    data = User.query.filter(User.data_id == data_id).all()
     serialized = []
     for data in data:
         serialized.append({'id': data.id,
                            'user_id': data.data_id,
-                           'full_name': data.full_name,
+                           'username': data.username,
                            'age': data.age,
                            'description': data.description})
     return jsonify(serialized)
@@ -52,18 +52,18 @@ def get_profile_data():
 @jwt_required()
 def send_message(profile_id):
     data_id = get_jwt_identity()
-    item = user_data.query.filter(user_data.id == profile_id,
-                                  user_data.data_id == data_id).first()
+    item = User.query.filter(User.id == profile_id,
+                                  User.data_id == data_id).first()
     params = request.json
     # Как получить параметры в эту функцию с фронта?
 
 
 
-@app.route('/profile', methods=["POST"], endpoint='add_profile')  # метод ввода данных
+'''@app.route('/profile', methods=["POST"], endpoint='add_profile')  # метод ввода данных
 @jwt_required()
 def add_profile():
     data_id = get_jwt_identity()
-    new_one = user_data(data_id=data_id, **request.json)
+    new_one = User(data_id=data_id, **request.json)
     session.add(new_one)
     session.commit()
     serialized = {'id': new_one.id,
@@ -71,15 +71,15 @@ def add_profile():
                   'full_name': new_one.full_name,
                   'age': new_one.age,
                   'description': new_one.description}
-    return jsonify(serialized)
+    return jsonify(serialized)'''
 
 
 @app.route("/profile/<int:profile_id>", methods=['PUT'], endpoint='update_profile_data')  # метод внесения измнений в данные
 @jwt_required()
 def update_profile_data(profile_id):
-    data_id = get_jwt_identity()
-    item = user_data.query.filter(user_data.id == profile_id,
-                                  user_data.data_id == data_id).first()
+    user_id = get_jwt_identity()
+    item = User.query.filter(User.id == profile_id,
+                                  User.id == user_id).first()
     params = request.json
     if not item:
         return {'message': 'No profiles with this id'}
@@ -87,8 +87,7 @@ def update_profile_data(profile_id):
         setattr(item, key, value)
     session.commit()
     serialized = {'id': item.id,
-                  'user_id': item.data_id,
-                  'full_name': item.full_name,
+                  'full_name': item.username,
                   'age': item.age,
                   'description': item.description}
     return serialized
@@ -97,9 +96,9 @@ def update_profile_data(profile_id):
 @app.route('/profile/<int:profile_id>', methods=['DELETE'], endpoint='delete_profile')  # метод удаления данных
 @jwt_required()
 def delete_profile(profile_id):
-    data_id = get_jwt_identity()
-    item = user_data.query.filter(user_data.id == profile_id,
-                                  user_data.data_id == data_id).first()
+    user_id = get_jwt_identity()
+    item = User.query.filter(User.id == profile_id,
+                                  User.data_id == user_id).first()
     if not item:
         return {'message': 'No files with this id'}, 400
     session.delete(item)
@@ -111,10 +110,10 @@ def delete_profile(profile_id):
 @app.route('/cards', methods=['GET'], endpoint='get_cards')
 @jwt_required()
 def ger_cards():
-    data = user_data.query.all()
+    data = User.query.all()
     serialized = []
     for data in data:
-        serialized.append({'full_name': data.full_name,
+        serialized.append({'full_name': data.username,
                            'age': data.age,
                            'description': data.description})
     rnd_crd = []
@@ -154,12 +153,12 @@ def login():
     return {'access_token': access_token, 'refresh token': refresh_token, 'username': crutch['username'], 'id': crutch['id']}
 
 
-@app.route("/logout", methods=["DELETE"])
+@app.route("/logout", methods=["GET"])
 @jwt_required()
 def modify_token(access_token, refresh_token):
     user = get_jwt_identity()
-    access_token = '1'
-    refresh_token = '2'
+    access_token = create_access_token(identity=user.id, expires_delta=timedelta(seconds=1))
+    refresh_token = create_refresh_token(identity=user.id, expires_delta=timedelta(seconds=1))
 
 @app.route('/delete', methods=['DELETE'], endpoint='delete_user')  # удаление пользователя
 @jwt_required()
@@ -184,6 +183,9 @@ def like_card():
                       'user_id': likes_id.user_id,
                       'likes_id': likes_id.likes_id}
         return jsonify(serialized)
+
+
+
 
 
 
