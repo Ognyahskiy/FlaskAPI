@@ -22,6 +22,11 @@ class sympathy(Base):
     likes_id=db.Column(db.Integer, db.ForeignKey('users.id'))
 
 
+class tokens(Base):
+    __tablename__ = 'tokens'
+    id = db.Column(db.Integer, primary_key=True)
+    jwt = db.Column(db.String(512))
+    refresh = db.Column(db.String(512))
 class User(Base):  # создаем таблицу с данными пользователей для входа
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
