@@ -1,3 +1,4 @@
+import sqlalchemy
 import sqlalchemy as db
 from sqlalchemy.orm import relationship
 from flask_jwt_extended import create_access_token, create_refresh_token
@@ -17,12 +18,13 @@ class user_data(Base):  # создание анкеты
 
 class users_chat(Base):
     __tablename__ = 'users_chat'
+    imply=sqlalchemy.Boolean
     id = db.Column(db.Integer, primary_key=True)
     sender = db.Column(db.Integer, db.ForeignKey('users.id'))
     recipient = db.Column(db.Integer, db.ForeignKey('users.id'))
     message = db.Column(db.String(512), nullable=False)
-    send_time = db.Column(db.Date, nullable=False)
-    read = db.Column(db.Boolean, nullable=False)
+    send_time = db.Column(db.String(16), nullable=False)
+    read = db.Column(db.Integer, nullable=False)
 
 
 class sympathy(Base):
@@ -37,6 +39,8 @@ class tokens(Base):
     id = db.Column(db.Integer, primary_key=True)
     jwt = db.Column(db.String(512))
     refresh = db.Column(db.String(512))
+
+
 class User(Base):  # создаем таблицу с данными пользователей для входа
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -45,7 +49,7 @@ class User(Base):  # создаем таблицу с данными польз�
     password = db.Column(db.String(128), nullable=False)
     age = db.Column(db.Integer, nullable=True)
     description = db.Column(db.String(128), nullable=True)
-    #datas = relationship('user_data', backref='user', lazy=True)
+    #datas = relationship('users_chat', backref='user', lazy=True)
 
     def __init__(self, **kwargs):
         self.username = kwargs.get('username')
