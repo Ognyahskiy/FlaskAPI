@@ -15,6 +15,16 @@ class user_data(Base):  # создание анкеты
     description = db.Column(db.String(128), nullable=True)
 
 
+class users_chat(Base):
+    __tablename__ = 'users_chat'
+    id = db.Column(db.Integer, primary_key=True)
+    sender = db.Column(db.Integer, db.ForeignKey('users.id'))
+    recipient = db.Column(db.Integer, db.ForeignKey('users.id'))
+    message = db.Column(db.String(512), nullable=False)
+    send_time = db.Column(db.Date, nullable=False)
+    read = db.Column(db.Boolean, nullable=False)
+
+
 class sympathy(Base):
     __tablename__ = 'like'
     id=db.Column(db.Integer, primary_key=True)
